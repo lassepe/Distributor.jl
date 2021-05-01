@@ -17,6 +17,7 @@ function start_workers(;
     # master_worker` seems neccessary to get ssh multi-plexing to work.
     cluster_config = (; tunnel = true, topology = :master_worker),
     sync_path = nothing,
+    exeflags = "--project",
 )
     @assert all(remote_nodes) do n
         n.n_workers == :auto || n.n_workers > 0
@@ -27,11 +28,15 @@ function start_workers(;
             sync_remote_files(first(remote_nodes).hostname, sync_path)
         end
 
-        Distributed.addprocs([(n.hostname, n.n_workers) for n in remote_nodes]; cluster_config...)
+        Distributed.addprocs(
+            [(n.hostname, n.n_workers) for n in remote_nodes];
+            cluster_config...,
+            exeflags,
+        )
     end
 
     if n_workers_local == :auto || n_workers_local > 0
-        Distributed.addprocs(n_workers_local)
+        Distributed.addprocs(n_workers_local; exeflags)
     end
 
     Distributed.workers()
