@@ -15,9 +15,11 @@ function start_workers(;
     n_workers_local = 0,
     # NOTE: only the ssh tunnel is relevant for connecting to IPB remotely. `topology =
     # master_worker` seems neccessary to get ssh multi-plexing to work.
-    cluster_config = (; tunnel = true, topology = :master_worker),
     sync_path = nothing,
     exeflags = "--project",
+    topology = :master_worker,
+    tunnel = true,
+    addprocs_kwargs...,
 )
     @assert all(remote_nodes) do n
         n.n_workers == :auto || n.n_workers > 0
@@ -30,13 +32,15 @@ function start_workers(;
 
         Distributed.addprocs(
             [(n.hostname, n.n_workers) for n in remote_nodes];
-            cluster_config...,
             exeflags,
+            topology,
+            tunnel,
+            addprocs_kwargs...,
         )
     end
 
     if n_workers_local == :auto || n_workers_local > 0
-        Distributed.addprocs(n_workers_local; cluster_config..., exeflags)
+        Distributed.addprocs(n_workers_local; exeflags, topology, addprocs_kwargs...)
     end
 
     Distributed.workers()
