@@ -36,7 +36,7 @@ function start_workers(;
     end
 
     if n_workers_local == :auto || n_workers_local > 0
-        Distributed.addprocs(n_workers_local; exeflags)
+        Distributed.addprocs(n_workers_local; cluster_config..., exeflags)
     end
 
     Distributed.workers()
