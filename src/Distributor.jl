@@ -53,7 +53,8 @@ end
 
 "Sync files via rsync to remote node. Assuming same path layout as on local machine."
 function sync_remote_files(remote_node_hostname, path)
-    run(`rsync -r -a -v -e ssh --delete $path/ $remote_node_hostname:$path`)
+    run(`ssh $remote_node_hostname mkdir -p $path`)
+    run(`rsync -ra --delete --info=progress2 $path/ $remote_node_hostname:$path`)
 end
 
 end # module
